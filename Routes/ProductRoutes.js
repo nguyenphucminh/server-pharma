@@ -1,10 +1,13 @@
 import express from 'express'
 import asyncHandler from 'express-async-handler'
 import Product from '../Models/ProductModel.js'
+import HistoryNotification from "./../Models/HistoryNotification.js";
 import moment from 'moment';
-// import { protect, admin } from "../Middleware/AuthMiddleware.js";
+import { protect, admin } from "../Middleware/AuthMiddleware.js";
 import multer from "multer"
 import cors from "cors"
+import Category from '../Models/CategoryModel.js';
+import { ConfigNotify } from '../Services/push-notification.service.js';
 const productRoute = express.Router();
 const day = moment(Date.now());
 
@@ -109,12 +112,14 @@ async function fetchCategoryWiseProduct(id) {
 // ADMIN GET ALL PRODUCT WITHOUT SEARCH AND PAGINATION
 productRoute.get(
   "/allproduct",
+  protect,
   async (req, res) => {
     const products = await Product.find().populate('category', '_id name').populate('categoryDrug', '_id name').sort({ _id: -1 });
     res.json(products);
   });
 
 productRoute.get("/all",
+  protect,
   asyncHandler(async (req, res) => {
     const pageSize = 10;
     const currentPage = Number(req.query.pageNumber) || 1;
@@ -164,6 +169,8 @@ productRoute.get("/:id/categories",
 )
 
 productRoute.get("/:id/categories-drug",
+  protect,
+  admin,
   asyncHandler(async (req, res) => {
     const product = await Product.find().populate('categoryDrug', '_id name')
     const productCategoriesDrug = product.filter(item => item?.categoryDrug?._id.toHexString() === req.params.id)
@@ -190,6 +197,7 @@ productRoute.get("/:id",
 // PRODUCT REVIEW
 productRoute.post(
   "/:id/review",
+  protect,
   asyncHandler(async (req, res) => {
     const { rating, comment } = req.body;
     const product = await Product.findById(req.params.id);
@@ -226,6 +234,8 @@ productRoute.post(
 // DELETE PRODUCT
 productRoute.delete(
   "/:id",
+  protect,
+  admin,
   asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (product) {
@@ -241,6 +251,8 @@ productRoute.delete(
 // CREATE PRODUCT
 productRoute.post(
   "/",
+  protect,
+  admin,
   asyncHandler(async (req, res) => {
     const { name, price, description, image, countInStock, category, categoryDrug, unit, regisId, expDrug, statusDrug, capacity } = req.body;
     const productExist = await Product.findOne({ name, unit });
@@ -284,6 +296,8 @@ productRoute.post(
 // UPDATE PRODUCT
 productRoute.put(
   "/:id",
+  protect,
+  admin,
   asyncHandler(async (req, res) => {
     const { name, price, description, image, countInStock, category, categoryDrug, unit, regisId, expDrug, statusDrug, capacity } = req.body;
     const product = await Product.findById(req.params.id);
