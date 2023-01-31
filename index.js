@@ -20,6 +20,7 @@ app.use(express.json());
 app.use("/api/import", ImportData)
 app.use("/api/products", productRoute)
 app.use("/api/users", userRouter);
+app.use("/api/orders", orderRouter)
 app.use("/api/category", categoryRouter)
 app.use("/api/category-drug", categoryDrugRouter)
 app.use("/api/provider", providerRoutes)
@@ -39,6 +40,9 @@ app.get("/", (req, res)=>{
 app.get("*", (req, res) => {
     res.send("Nhập Sai Đường Dẫn! Vui Lòng Nhập Lại >.<")
 });
+// ERROR HANDLER
+app.use(notFound);
+app.use(errorHandler);
 
 const PORT = process.env.PORT
 app.listen(PORT,console.log(`✨ Server run in port ${PORT}`));
