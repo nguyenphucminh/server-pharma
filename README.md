@@ -1,5 +1,2 @@
 ### API version local
-
-- Clone về
-- Mở project
-- npm start
+https://pharma-api-server.vercel.app/
